@@ -1,0 +1,108 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@using PayrollCSVExtractor.Models
+@model List<Employee>
+
+
+<div class="text-center">
+    <h2 class="display-5">Welcome! Upload your CSV file below to see Employee payroll information</h2>
+</div>
+
+@* toast to show that only csv files can be accepted https://getbootstrap.com/docs/5.0/components/toasts/*@
+<div class="toast bg-danger text-white fade" id="myToast" style="position: absolute; top: 10px; right: 10px;">
+    <div class="toast-header bg-danger text-white">
+        <strong class="me-auto"><i class="bi-gift-fill"></i> Alert </strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+        File Selected is not a CSV file, please upload the correct file type
+    </div>
+</div>
+
+@* displays error message if an exception occurs or if csv file does not match the fields required https://www.youtube.com/watch?v=DyFgB878pOI&t=16s*@
+@if (TempData["error"] != null)
+{
+    <div class="alert alert-danger">
+        <strong>Upload Failed:</strong> @TempData["error"]
+    </div>
+
+
+}
+
+@* form to handle file upload, will only let you upload csv files and blocks you from submitting form if nothing is attached*@
+<div class="bg-white w-100 p-4 d-flex justify-content-center pb-4">
+    <form asp-controller="Home" asp-action="Index" method="post" enctype="multipart/form-data">
+        <label class="form-label" for="customFile">Insert File Here</label>
+        <input type="file" class="form-control" name="payrollcsv" accept=".csv" onchange="VerifyFile(this)" required />
+        <br />
+        <button type="submit" class="btn btn-primary mx-auto">Upload File</button>
+    </form>
+</div>
+
+@* table to show data after request is made using datatables https://datatables.net*@
+<div>
+    <table id="employeeDatatable" class="table table-striped table-bordered dt-responsive nowrap">
+        <thead>
+        <tr>
+            <th>
+                Employee ID
+            </th>
+            <th>
+                First Name
+            </th>
+            <th>
+                Last Name
+            </th>
+            <th>
+                Payroll
+            </th>
+            <th>
+                Error
+            </th>
+        </tr>
+        </thead>
+        @*will not show any information until the model is not null https://www.youtube.com/watch?v=LECH7G4mmfs*@
+        @if (Model != null)
+        {
+
+        foreach(var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.EmployeeId
+                </td>
+                <td>
+                    @item.FirstName
+                </td>
+                <td>
+                    @item.LastName
+                </td>
+                <td>
+                    @item.Payroll
+                </td>
+                <td>
+                    @item.Error
+                </td>
+            </tr>
+        }
+        }
+
+    </table>
+</div>
+
+
+@* scrip to activate toast if file is not a csv script edited from one of the comments in https://stackoverflow.com/questions/11832930/html-input-file-accept-attribute-file-type-csv*@
+<script type="text/javascript" language="javascript">
+    function VerifyFile(file) {
+        var AcceptedFiles = ".csv";
+        var SentFile = file.value;
+        if (SentFile.match(AcceptedFiles) == null) {
+            $(file).val("");
+            $("#myToast").toast("show");
+            return False;
+        }
+        else return True;
+    }    
+</script>
